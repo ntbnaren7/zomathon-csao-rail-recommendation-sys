@@ -14,7 +14,7 @@
 ---
 
 # 📝 Executive Summary
-This submission presents **CSAO Rail**, a production-ready recommendation engine designed to increase Zomato’s Average Order Value (AOV) through context-aware Cart Super Add-Ons. 
+This submission presents **CSAO Rail**, a production-ready recommendation engine developed by **Team OverClocked** to increase Zomato’s Average Order Value (AOV) through context-aware Cart Super Add-Ons. 
 
 Our solution moves beyond simple co-occurrence by introducing **Meal DNA** (a cuisine-aware meal completion logic) and a **Heterogeneous Ensemble** (XGBoost + DCN-V2) that balances the split-logic strengths of trees with the deep-interaction capability of neural networks. The system achieves a **0.611 AUC** with a **5ms inference latency**, meeting the strict real-time requirements of the Zomato checkout flow.
 
