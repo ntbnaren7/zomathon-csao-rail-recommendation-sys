@@ -10,20 +10,57 @@
 
 ## 1. Data Prep & Feature Engineering (20%)
 *   **Realism:** Synthetic data for 10K users/116K orders mimicking messy reality: city-wise behavior (Mumbai vs. Lucknow), peak lunch/dinner hours, and festival-aware spikes.
+*   **Sample Data (Menu & Orders):**
+```csv
+item_id,name,cuisine,price,meal_role,popularity
+I0001,Chicken Biryani,biryani,350.0,protein,0.92
+I0042,Paneer Tikka,mughlai,280.0,protein,0.85
+I0115,Gulab Jamun,dessert,120.0,dessert,0.78
+I0342,Coke 330ml,beverage,60.0,drink,0.95
+```
 *   **Signal:** 72-dim features including **Item2Vec embeddings** (Skip-gram) to Generalize beyond co-occurrence and solve sparsity.
-*   **Cold Start:** Automatic fallback to segment-priors + Thompson Sampling for exploration.
 
 ## 2. Ideation & Problem Formulation (15%)
 *   **Framing:** Mathematically framed as a **Multi-Task Learning-to-Rank** problem. 
-*   **Optimization:** Jointly optimizes for *Item Acceptance* + *Order Completion (C2O)* to prevent cart abandonment.
+*   **Flow — Meal DNA Evolution:**
+```mermaid
+graph LR
+    C1[Cart: Biryani] -- "Gap: Drink/Side" --> R1[Rec: Lassi/Raita]
+    R1 -- "User Adds Lassi" --> C2[Cart: Biryani + Lassi]
+    C2 -- "Gap: Dessert" --> R2[Rec: Gulab Jamun]
+    style C1 fill:#f9f,stroke:#333
+    style C2 fill:#bbf,stroke:#333
+```
 *   **Constraints:** Meal DNA handles incomplete patterns by identifying "meal role gaps" in real-time.
 
+---
+
 ## 3. Model Architecture & The "AI Edge" (20%)
-| Innovation | The "AI Edge" |
-|:---|:---|
-| **Meal DNA** | 6-dim encoding identifies missing roles (protein/drink/side) based on cuisine templates. |
-| **Ensemble** | **XGBoost + DCN-V2** (Heterogeneous) — capture tree-splits + deep polynomial features. |
-| **Hard Negatives** | 3-strategy mining (same-role, popularity, random) for fine-grained discrimination. |
+
+### Detailed Pipeline Architecture
+```mermaid
+graph TD
+    Input[User Cart + Context] --> FE[Feature Engine: 72 Dimensions]
+    FE --> DNA[Meal DNA Encoder: Cuisine-Specific Gaps]
+    
+    subgraph "Ensemble Scoring (α=0.15)"
+        DNA --> XGB[XGBoost: Gradient Boosting on Trees]
+        DNA --> DCN[DCN-V2: Deep & Cross Neural Network]
+    end
+    
+    XGB -- weighted --> ENS[Ensemble Logit]
+    DCN -- weighted --> ENS
+    
+    ENS --> PR[Post-Ranker: MMR Diversification]
+    PR --> TS[Thompson Sampling: Cold-Start Exploration]
+    TS --> Output[Final Top-8 Rail]
+
+    style XGB fill:#2ed573,color:white
+    style DCN fill:#3742fa,color:white
+    style ENS fill:#e23744,color:white
+```
+
+---
 
 ## 4. Model Evaluation & Fine-Tuning (15%)
 *   **Rigorous Split:** 80/10/10 **Temporal Split** (no data leakage) simulates real deployment.
