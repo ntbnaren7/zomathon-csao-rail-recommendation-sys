@@ -1,5 +1,32 @@
 # CSAO Rail — Cart Super Add-On Recommendation System
-## Submission Document
+## Official Hackathon Submission
+
+---
+
+# 🚀 Quick Links & Resources
+- **GitHub Repository:** [zomathon-csao-rail-recommendation-sys](https://github.com/ntbnaren7/zomathon-csao-rail-recommendation-sys) (All code, models, and data scripts)
+- **Interactive Demo:** http://localhost:8000 (after running `serving.api`)
+- **Key Artifacts:** 
+  - [XGBoost+DCN Ensemble Model](https://github.com/ntbnaren7/zomathon-csao-rail-recommendation-sys/blob/main/models/ensemble.py)
+  - [Meal DNA Encoder](https://github.com/ntbnaren7/zomathon-csao-rail-recommendation-sys/blob/main/features/meal_dna.py)
+  - [Item2Vec Embedding Trainer](https://github.com/ntbnaren7/zomathon-csao-rail-recommendation-sys/blob/main/features/item2vec.py)
+
+---
+
+# 📝 Executive Summary
+This submission presents **CSAO Rail**, a production-ready recommendation engine designed to increase Zomato’s Average Order Value (AOV) through context-aware Cart Super Add-Ons. 
+
+Our solution moves beyond simple co-occurrence by introducing **Meal DNA** (a cuisine-aware meal completion logic) and a **Heterogeneous Ensemble** (XGBoost + DCN-V2) that balances the split-logic strengths of trees with the deep-interaction capability of neural networks. The system achieves a **0.611 AUC** with a **5ms inference latency**, meeting the strict real-time requirements of the Zomato checkout flow.
+
+---
+
+# 🧠 Core Assumptions & Constraints
+Before diving into the methodology, we define the following foundational assumptions used to build the synthetic environment and model:
+
+1.  **Meal Completeness Drives Conversion:** We assume Indian consumers are more likely to accept add-ons that "complete" a meal (e.g., adding a drink to a spicy biryani or a dessert to a dinner meal) rather than random popular items.
+2.  **Temporal & Geographic Sensitivity:** Ordering behavior in Mumbai (late-night street food) differs significantly from Lucknow (premium Mughlai dinner), and our data generation reflects these city-wise distributions.
+3.  **Positive Feedback Proxy:** In our synthetic data, we treat "item added to cart from suggestions" as a positive label, mirroring the implicit feedback used in production CSAO rails.
+4.  **Hardware Constraint:** We assume deployment on a standard cloud instance with GPU acceleration available for DCN-V2 inference and XGBoost scoring.
 
 ---
 
@@ -413,6 +440,38 @@ For faster signal detection, we also propose **Team Draft Interleaving**: merge 
 | **Ship** | Acceptance rate ↑ AND AOV ↑ AND no guardrail breach | Accept rate +2%, AOV +5% | Full rollout |
 | **Iterate** | Acceptance rate ↑ BUT guardrails borderline | Acceptance +1%, any guardrail >50% threshold | Re-tune model, re-test |
 | **Kill** | No improvement OR guardrail breach | Acceptance Δ < 0.5% OR any guardrail exceeded | Revert, analyze failure |
+
+---
+
+# 7. Interactive Demo Dashboard
+
+To demonstrate the real-time capabilities of the CSAO Rail, we built a high-fidelity, interactive dashboard. This dashboard serves as a live visualization of our recommendation engine's decision-making process.
+
+![Full Demo Dashboard](file:///C:/Users/ntbft/.gemini/antigravity/brain/4832cfb1-aac0-416f-9462-9b8bd101ab8b/final_full_dashboard_1772458452726.png)
+*Figure 1: Complete view of the Zomato CSAO Demo Dashboard.*
+
+## 7.1 Why We Built It
+While offline metrics (AUC, NDCG) provide statistical validation, they don't capture the **user experience** of real-time recommendations. We built this dashboard to:
+1.  **Validate Contextual Awareness:** Visually prove how recommendations shift instantly as items are added or temporal factors (like meal period) change.
+2.  **Demonstrate Performance:** Showcase the sub-10ms inference latency in a real-world frontend environment.
+3.  **Explain the "Why":** Use the Meal DNA visualization to make the model's choices transparent and interpretable.
+
+## 7.2 Key Functionality
+
+### 🚀 Real-Time Recommendation Rail
+The core feature of the dashboard is the dynamic recommendation rail. As items are added to the cart, the system triggers a re-score of all candidates within 7ms.
+
+![Recommendations Rail](file:///C:/Users/ntbft/.gemini/antigravity/brain/4832cfb1-aac0-416f-9462-9b8bd101ab8b/recommendations_rail_closeup_v2_1772458441939.png)
+*Figure 2: The recommendation rail with explainable tags (e.g., "Popular combo") and real-time scoring.*
+
+### 🧬 Meal DNA Visualization
+The dashboard provides a unique view into our **Meal DNA** engine. It breaks down the current cart's nutritional and role-based completion and highlights the "Missing Roles" that the engine is currently prioritizing.
+
+![Meal DNA Visualization](file:///C:/Users/ntbft/.gemini/antigravity/brain/4832cfb1-aac0-416f-9462-9b8bd101ab8b/meal_dna_visualization_closeup_1772458443308.png)
+*Figure 3: Detailed breakdown of the active cart's Meal DNA and identified gaps.*
+
+### 🛠️ Configurable Context
+The left panel allows developers to manipulate contextual factors (City, Restaurant, Meal Period, Time, Season) to test the model's robustness across different scenarios without needing separate datasets.
 
 ---
 
